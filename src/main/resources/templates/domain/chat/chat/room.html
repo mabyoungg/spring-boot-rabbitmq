@@ -21,7 +21,14 @@
 
         const chatRoomId = /*[[${chatRoom.id}]]*/ 0;
 
-        
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+
+            stompClient.subscribe(`/topic/chat${chatRoomId}MessageCreated`, function (data) {
+                const jsonData = JSON.parse(data.body);
+                drawChatMessage(jsonData);
+            });
+        });
 
         async function loadChatMessages() {
             try {
