@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 </head>
 <body>
     <style>
@@ -13,7 +16,12 @@
     </style>
 
     <script th:inline="javascript">
+        const socket = new SockJS('/ws');
+        const stompClient = Stomp.over(socket);
+
         const chatRoomId = /*[[${chatRoom.id}]]*/ 0;
+
+        
 
         async function loadChatMessages() {
             try {
@@ -78,7 +86,11 @@
             const writerName = form.writerName.value.trim();
             const body = form.body.value.trim();
 
-            alert(writerName + ' ' + body);
+            stompClient.send(
+                `/app/chat/${chatRoomId}/messages/create`,
+                {},
+                JSON.stringify({writerName, body})
+            );
         }
     </script>
 
