@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.springbootrabbitmq.chat.entity.ChatMessage;
 import org.example.springbootrabbitmq.chat.entity.ChatRoom;
 import org.example.springbootrabbitmq.chat.service.ChatService;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.example.springbootrabbitmq.global.stomp.StompMessageTemplate;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
@@ -21,7 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ChatController {
     private final ChatService chatService;
-    private final RabbitTemplate template;
+    private final StompMessageTemplate template;
 
     @GetMapping("/{roomId}")
     public String showRoom(
@@ -57,6 +57,6 @@ public class ChatController {
 
         ChatMessage chatMessage = chatService.writeMessage(chatRoom, createMessageReqBody.writerName(), createMessageReqBody.body());
 
-        template.convertAndSend("amq.topic", "chat" + roomId + "MessageCreated", chatMessage);
+        template.convertAndSend("topic", "chat" + roomId + "MessageCreated", chatMessage);
     }
 }
