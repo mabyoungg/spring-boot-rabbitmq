@@ -1,13 +1,17 @@
-package org.example.springbootrabbitmq.chat.controller;
+package org.example.springbootrabbitmq.domain.chat.chat.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.springbootrabbitmq.chat.entity.ChatMessage;
-import org.example.springbootrabbitmq.chat.entity.ChatRoom;
-import org.example.springbootrabbitmq.chat.service.ChatService;
+import org.example.springbootrabbitmq.domain.chat.chat.dto.ChatMessageDto;
+import org.example.springbootrabbitmq.domain.chat.chat.entity.ChatMessage;
+import org.example.springbootrabbitmq.domain.chat.chat.entity.ChatRoom;
+import org.example.springbootrabbitmq.domain.chat.chat.service.ChatService;
+import org.example.springbootrabbitmq.domain.member.member.entity.Member;
+import org.example.springbootrabbitmq.domain.member.member.service.MemberService;
 import org.example.springbootrabbitmq.global.stomp.StompMessageTemplate;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,9 +23,11 @@ import java.util.List;
 @Controller
 @RequestMapping("/chat")
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ChatController {
     private final ChatService chatService;
     private final StompMessageTemplate template;
+    private final MemberService memberService;
 
     @GetMapping("/{roomId}")
     public String showRoom(
@@ -36,27 +42,34 @@ public class ChatController {
 
     @GetMapping("/{roomId}/messages")
     @ResponseBody
-    public List<ChatMessage> showRoomMessages(
+    public List<ChatMessageDto> showRoomMessages(
             @PathVariable long roomId,
             Model model
     ) {
         List<ChatMessage> messages = chatService.findMessagesByRoomId(roomId);
 
-        return messages;
+        return messages
+                .stream()
+                .map(message -> new ChatMessageDto(message.getId(), message.getChatRoom().getId(), message.getWriter().getName(), message.getBody()))
+                .toList();
     }
 
-    public record CreateMessageReqBody(String writerName, String body) {
+    public record CreateMessageReqBody(String body) {
     }
 
     @MessageMapping("/chat/{roomId}/messages/create")
+    @Transactional
     public void createMessage(
             CreateMessageReqBody createMessageReqBody,
             @DestinationVariable long roomId
     ) {
+        Member member = memberService.findByUsername("user1").get();
         ChatRoom chatRoom = chatService.findRoomById(roomId).get();
 
-        ChatMessage chatMessage = chatService.writeMessage(chatRoom, createMessageReqBody.writerName(), createMessageReqBody.body());
+        ChatMessage chatMessage = chatService.writeMessage(chatRoom, member, createMessageReqBody.body());
 
-        template.convertAndSend("topic", "chat" + roomId + "MessageCreated", chatMessage);
+        ChatMessageDto chatMessageDto = new ChatMessageDto(chatMessage.getId(), chatMessage.getChatRoom().getId(), chatMessage.getWriter().getName(), chatMessage.getBody());
+
+        template.convertAndSend("topic", "chat" + roomId + "MessageCreated", chatMessageDto);
     }
 }

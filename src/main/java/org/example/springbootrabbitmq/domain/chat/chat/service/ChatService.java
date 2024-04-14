@@ -1,10 +1,11 @@
-package org.example.springbootrabbitmq.chat.service;
+package org.example.springbootrabbitmq.domain.chat.chat.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.springbootrabbitmq.chat.entity.ChatMessage;
-import org.example.springbootrabbitmq.chat.entity.ChatRoom;
-import org.example.springbootrabbitmq.chat.repository.ChatMessageRepository;
-import org.example.springbootrabbitmq.chat.repository.ChatRoomRepository;
+import org.example.springbootrabbitmq.domain.chat.chat.entity.ChatMessage;
+import org.example.springbootrabbitmq.domain.chat.chat.entity.ChatRoom;
+import org.example.springbootrabbitmq.domain.chat.chat.repository.ChatMessageRepository;
+import org.example.springbootrabbitmq.domain.chat.chat.repository.ChatRoomRepository;
+import org.example.springbootrabbitmq.domain.member.member.entity.Member;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,9 +24,10 @@ public class ChatService {
     }
 
     @Transactional
-    public ChatRoom createRoom(String name) {
+    public ChatRoom createRoom(Member owner, String name) {
         ChatRoom chatRoom = ChatRoom
                 .builder()
+                .owner(owner)
                 .name(name)
                 .build();
 
@@ -33,11 +35,11 @@ public class ChatService {
     }
 
     @Transactional
-    public ChatMessage writeMessage(ChatRoom room, String writerName, String body) {
+    public ChatMessage writeMessage(ChatRoom room, Member writer, String body) {
         ChatMessage chatMessage = ChatMessage
                 .builder()
                 .chatRoom(room)
-                .writerName(writerName)
+                .writer(writer)
                 .body(body)
                 .build();
 
