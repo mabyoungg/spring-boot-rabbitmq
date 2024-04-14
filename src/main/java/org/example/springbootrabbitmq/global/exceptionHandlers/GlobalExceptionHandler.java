@@ -27,8 +27,8 @@ public class GlobalExceptionHandler {
     private final Rq rq;
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleException(Exception ex) {
-        // if (!rq.isApi()) throw ex;
+    public ResponseEntity<Object> handleException(Exception ex) throws Exception {
+         if (!rq.isApi()) throw ex;
 
         return handleApiException(ex);
     }

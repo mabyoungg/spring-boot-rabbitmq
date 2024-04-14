@@ -10,6 +10,7 @@ import org.example.springbootrabbitmq.domain.member.member.service.MemberService
 import org.example.springbootrabbitmq.global.stomp.StompMessageTemplate;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -29,6 +30,7 @@ public class ChatController {
     private final StompMessageTemplate template;
     private final MemberService memberService;
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{roomId}")
     public String showRoom(
             @PathVariable long roomId,
