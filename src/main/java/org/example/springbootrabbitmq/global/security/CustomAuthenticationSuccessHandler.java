@@ -28,7 +28,7 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
         String redirectUrlAfterSocialLogin = rq.getCookieValue("redirectUrlAfterSocialLogin", "");
 
         if (rq.isFrontUrl(redirectUrlAfterSocialLogin)) {
-            rq.destroySession();
+            rq.destroySecurityContextSession();
             rq.setCrossDomainCookie("accessToken", accessToken);
             rq.setCrossDomainCookie("refreshToken", refreshToken);
             rq.removeCookie("redirectUrlAfterSocialLogin");
@@ -36,7 +36,7 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
             response.sendRedirect(redirectUrlAfterSocialLogin);
             return;
         } else {
-            rq.destroySession();
+            rq.destroySecurityContextSession();
             rq.setCrossDomainCookie("accessToken", accessToken);
             rq.setCrossDomainCookie("refreshToken", refreshToken);
         }
