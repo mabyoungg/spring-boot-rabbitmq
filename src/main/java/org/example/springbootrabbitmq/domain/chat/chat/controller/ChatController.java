@@ -54,7 +54,7 @@ public class ChatController {
 
         return messages
                 .stream()
-                .map(message -> new ChatMessageDto(message.getId(), message.getChatRoom().getId(), message.getWriter().getName(), message.getBody()))
+                .map(ChatMessageDto::new)
                 .toList();
     }
 
@@ -73,7 +73,7 @@ public class ChatController {
 
         ChatRoom chatRoom = chatService.findRoomById(roomId).get();
         ChatMessage chatMessage = chatService.writeMessage(chatRoom, member, createMessageReqBody.body());
-        ChatMessageDto chatMessageDto = new ChatMessageDto(chatMessage.getId(), chatMessage.getChatRoom().getId(), chatMessage.getWriter().getName(), chatMessage.getBody());
+        ChatMessageDto chatMessageDto = new ChatMessageDto(chatMessage);
 
         template.convertAndSend("topic", "chat" + roomId + "MessageCreated", chatMessageDto);
     }
