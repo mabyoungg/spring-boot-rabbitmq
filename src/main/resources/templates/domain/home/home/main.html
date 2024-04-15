@@ -44,6 +44,9 @@
     <section id="chatRoomListPage" class="page">
         <h1>채팅방 리스트</h1>
 
+        <ul id="chatRoomList"></ul>
+        <div id="chatRoomListPagination"></div>
+
     </section>
 
     <script>
@@ -51,12 +54,9 @@
 
         // 유틸 시작
         function ucfirst(str) {
-            // 문자열이 비어있지 않은 경우에만 처리
             if (str && str.length > 0) {
-                // 첫 글자를 대문자로 변환하고 나머지 문자열과 결합
                 return str.charAt(0).toUpperCase() + str.slice(1);
             } else {
-                // 비어있는 문자열의 경우, 그대로 반환
                 return str;
             }
         }
@@ -127,6 +127,8 @@
 
         // 채팅방 목록 페이지 관련 시작
         async function onChatRoomListPageStarted() {
+            let data = null;
+
             try {
                 const response = await fetch("http://localhost:8090/api/v1/chatRooms", {
                     method: "GET",
@@ -136,21 +138,55 @@
                     credentials: "include"
                 });
 
-                const data = await response.json();
+                const responsData = await response.json();
 
-                if (!response.ok) throw data;
+                if (!response.ok) throw responsData;
 
-                console.log(
-                    "GET http://localhost:8090/api/v1/chatRooms, data.data.itemPage",
-                    data.data.itemPage
-                );
+                data = responsData;
             } catch (error) {
                 console.error("GET chatRooms failed:", error);
+            }
+
+            drawChatRoomList(data.data.itemPage);
+        }
+
+        function drawChatRoomList(itemPage) {
+            const chatRoomListEl = document.querySelector("#chatRoomList");
+            const chatRoomListPaginationEl = document.querySelector(
+                "#chatRoomListPagination"
+            );
+
+            chatRoomListEl.innerHTML = "";
+            chatRoomListPaginationEl.innerHTML = "";
+
+            if (itemPage.content.length === 0) {
+                chatRoomListEl.innerHTML = "<li>채팅방이 없습니다.</li>";
+                return;
+            }
+
+            itemPage.content.forEach((chatRoom) => {
+                const li = document.createElement("li");
+                li.textContent = chatRoom.name;
+                chatRoomListEl.appendChild(li);
+            });
+
+            if (itemPage.totalPagesCount >= 1) {
+                for (let i = 1; i <= itemPage.totalPagesCount; i++) {
+                    const pageLink = document.createElement("a");
+                    pageLink.href = "#";
+                    pageLink.textContent = i;
+                    pageLink.classList.add("page-link");
+
+                    if (i === itemPage.number) pageLink.classList.add("active"); // 현재 페이지 표시
+
+                    chatRoomListPaginationEl.appendChild(pageLink);
+                }
             }
         }
         // 채팅방 목록 페이지 관련 끝
 
         showPage("login");
+
 
 
     </script>
