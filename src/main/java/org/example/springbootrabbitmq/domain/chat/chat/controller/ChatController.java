@@ -7,10 +7,12 @@ import org.example.springbootrabbitmq.domain.chat.chat.entity.ChatRoom;
 import org.example.springbootrabbitmq.domain.chat.chat.service.ChatService;
 import org.example.springbootrabbitmq.domain.member.member.entity.Member;
 import org.example.springbootrabbitmq.domain.member.member.service.MemberService;
+import org.example.springbootrabbitmq.global.security.SecurityUser;
 import org.example.springbootrabbitmq.global.stomp.StompMessageTemplate;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -63,13 +65,14 @@ public class ChatController {
     @Transactional
     public void createMessage(
             CreateMessageReqBody createMessageReqBody,
-            @DestinationVariable long roomId
+            @DestinationVariable long roomId,
+            Authentication authentication
     ) {
-        Member member = memberService.findByUsername("user1").get();
+        SecurityUser securityUser = (SecurityUser) authentication.getPrincipal();
+        Member member = memberService.getReferenceById(securityUser.getId());
+
         ChatRoom chatRoom = chatService.findRoomById(roomId).get();
-
         ChatMessage chatMessage = chatService.writeMessage(chatRoom, member, createMessageReqBody.body());
-
         ChatMessageDto chatMessageDto = new ChatMessageDto(chatMessage.getId(), chatMessage.getChatRoom().getId(), chatMessage.getWriter().getName(), chatMessage.getBody());
 
         template.convertAndSend("topic", "chat" + roomId + "MessageCreated", chatMessageDto);
