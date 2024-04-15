@@ -6,6 +6,9 @@ import org.example.springbootrabbitmq.domain.chat.chat.entity.ChatRoom;
 import org.example.springbootrabbitmq.domain.chat.chat.repository.ChatMessageRepository;
 import org.example.springbootrabbitmq.domain.chat.chat.repository.ChatRoomRepository;
 import org.example.springbootrabbitmq.domain.member.member.entity.Member;
+import org.example.springbootrabbitmq.standard.base.KwTypeV2;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,5 +55,9 @@ public class ChatService {
 
     public int count() {
         return (int) chatRoomRepository.count();
+    }
+
+    public Page<ChatRoom> findRoomByKw(KwTypeV2 kwType, String kw, Member owner, Boolean published, Pageable pageable) {
+        return chatRoomRepository.findByKw(kwType, kw, owner, published, pageable);
     }
 }

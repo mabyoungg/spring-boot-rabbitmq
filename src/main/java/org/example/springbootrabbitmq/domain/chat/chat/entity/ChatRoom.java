@@ -1,5 +1,6 @@
 package org.example.springbootrabbitmq.domain.chat.chat.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import lombok.*;
@@ -18,4 +19,6 @@ public class ChatRoom extends BaseTime {
     @ManyToOne
     private Member owner;
     private String name;
+    @Column(columnDefinition = "BOOLEAN default true")
+    private boolean published;
 }
