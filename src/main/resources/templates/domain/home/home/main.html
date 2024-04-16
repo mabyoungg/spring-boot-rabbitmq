@@ -90,6 +90,8 @@
 
         const stompSubscribeCallbacks = [];
 
+        let memberEventStompSubscription = null;
+
         function reconnectStomp() {
             const socket = new SockJS("https://localhost:8090/ws");
             stompClient = Stomp.over(socket);
@@ -98,6 +100,16 @@
 
             stompClient.connect({}, function (frame) {
                 console.log("Connected: " + frame);
+
+                if (rqMember) {
+                    memberEventStompSubscription = stompClient.subscribe(
+                        `/topic/member${rqMember.id}EventCreated`,
+                        function (data) {
+                            const jsonData = JSON.parse(data.body);
+                            alert(jsonData.msg);
+                        }
+                    );
+                }
 
                 stompSubscribeCallbacks.forEach((callback) => {
                     callback();
