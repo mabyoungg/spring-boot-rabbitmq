@@ -1,5 +1,6 @@
 package org.example.springbootrabbitmq.global.stomp;
 
+import org.example.springbootrabbitmq.global.app.AppConfig;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,7 +30,9 @@ public class StompRabbitMqBrokerConfig implements WebSocketMessageBrokerConfigur
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws").withSockJS();
+        registry.addEndpoint("/ws")
+                .setAllowedOrigins("https://cdpn.io", AppConfig.getSiteFrontUrl())
+                .withSockJS();
     }
 
     @Override
