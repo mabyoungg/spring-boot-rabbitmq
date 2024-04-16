@@ -29,6 +29,12 @@
             display: flex;
             gap: 10px;
         }
+
+        .chat-message.mine {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
     </style>
 </head>
 <body>
@@ -118,7 +124,9 @@
         }
 
         let rq = null;
+        let rqMember = null;
         let lastRq = null;
+        let lastRqMember = null;
 
         // 유틸 시작
         function ucfirst(str) {
@@ -139,10 +147,7 @@
             // 현재 URL에서 해시값을 가져옴
             const hash = window.location.hash;
 
-            if (rq != null) {
-                lastRq = rq;
-            }
-
+            lastRq = rq;
             rq = new Rq(hash);
 
             // 해시값에 따라 다른 함수를 실행
@@ -246,6 +251,9 @@
                 document.querySelector(
                     "#login-rs"
                 ).innerHTML = `<button>${data.data.item.name} 로그아웃</button>`;
+
+                lastRqMember = rqMember;
+                rqMember = data.data.item;
 
                 reconnectStomp();
             } catch (error) {
@@ -435,6 +443,10 @@
 
             const chatMessage = document.createElement("div");
             chatMessage.classList.add("chat-message");
+
+            if ( rqMember && rqMember.id == message.writerId ) {
+                chatMessage.classList.add("mine");
+            }
 
             const chatMessageId = document.createElement("div");
             chatMessageId.classList.add("chat-message__id");
