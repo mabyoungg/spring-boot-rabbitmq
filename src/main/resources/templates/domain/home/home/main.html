@@ -131,29 +131,31 @@
 
         // 전체 코드 시작
         // 해시 변경 이벤트 리스너를 설정하는 함수
+        function hashChanged() {
+            // 현재 URL에서 해시값을 가져옴
+            const hash = window.location.hash;
+
+            rq = new Rq(hash);
+
+            // 해시값에 따라 다른 함수를 실행
+            switch (rq.path) {
+                case "/member/login":
+                    showPage("memberLogin");
+                    break;
+                case "/chat/roomList":
+                    showPage("chatRoomList");
+                    break;
+                case "/chat/room":
+                    showPage("chatRoom");
+                    break;
+                default:
+                    alert(rq.path + " (은)는 존재하지 않는 페이지 입니다."); // TODO : 주석해제
+                    break;
+            }
+        }
+
         function setupHashRouting() {
-            window.addEventListener("hashchange", () => {
-                // 현재 URL에서 해시값을 가져옴
-                const hash = window.location.hash;
-
-                rq = new Rq(hash);
-
-                // 해시값에 따라 다른 함수를 실행
-                switch (rq.path) {
-                    case "/member/login":
-                        showPage("memberLogin");
-                        break;
-                    case "/chat/roomList":
-                        showPage("chatRoomList");
-                        break;
-                    case "/chat/room":
-                        showPage("chatRoom");
-                        break;
-                    default:
-                        alert(rq.path + " (은)는 존재하지 않는 페이지 입니다."); // TODO : 주석해제
-                        break;
-                }
-            });
+            window.addEventListener("hashchange", hashChanged);
         }
 
         // 페이지 로드 시 해시 라우팅 설정
@@ -411,13 +413,24 @@
         function submitSendForm(form) {
             const body = form.body.value.trim();
 
-            alert(body);
+            const chatRoomId = rq.getParamAsNumber("id", 0);
+
+            stompClient.send(
+                `/app/chat/${chatRoomId}/messages/create`,
+                {},
+                JSON.stringify({ body })
+            );
         }
         // 채팅방 페이지 관련 끝
 
         // 페이지 로드 시 로그인 페이지로 이동하도록 설정
-        document.addEventListener("DOMContentLoaded", () => movePage("/member/login"));
-
+        document.addEventListener("DOMContentLoaded", () => {
+            if (location.hash) {
+                hashChanged();
+            } else {
+                movePage("/member/login");
+            }
+        });
 
     </script>
 </body>
