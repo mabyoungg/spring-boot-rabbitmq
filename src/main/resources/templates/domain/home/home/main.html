@@ -88,11 +88,20 @@
 
         let stompClient = null;
 
+        const stompSubscribeCallbacks = [];
+
         function reconnectStomp() {
             const socket = new SockJS("https://localhost:8090/ws");
             stompClient = Stomp.over(socket);
+
+            stompSubscribeCallbacks.length = 0;
+
             stompClient.connect({}, function (frame) {
                 console.log("Connected: " + frame);
+
+                stompSubscribeCallbacks.forEach((callback) => {
+                    callback();
+                });
             });
         }
 
@@ -352,13 +361,25 @@
 
             alert(`${id}번 채팅방에 입장`);
 
-            chatRoomStompSubscription = stompClient.subscribe(
-                `/topic/chat${id}MessageCreated`,
-                function (data) {
-                    const jsonData = JSON.parse(data.body);
-                    drawChatMessage(jsonData);
-                }
-            );
+            subscribeChatRoomMessageCreated(id);
+        }
+
+        function subscribeChatRoomMessageCreated(id) {
+            const work = () => {
+                chatRoomStompSubscription = stompClient.subscribe(
+                    `/topic/chat${id}MessageCreated`,
+                    function (data) {
+                        const jsonData = JSON.parse(data.body);
+                        drawChatMessage(jsonData);
+                    }
+                );
+            };
+
+            if (stompClient.connected) {
+                work();
+            } else {
+                stompSubscribeCallbacks.push(work);
+            }
         }
 
         async function onChatRoomPageEnded() {
@@ -444,7 +465,7 @@
             const chatMessage = document.createElement("div");
             chatMessage.classList.add("chat-message");
 
-            if ( rqMember && rqMember.id == message.writerId ) {
+            if (rqMember && rqMember.id == message.writerId) {
                 chatMessage.classList.add("mine");
             }
 
@@ -484,14 +505,14 @@
         // 채팅방 페이지 관련 끝
 
         // 페이지 로드 시 로그인 페이지로 이동하도록 설정
+        reconnectStomp();
+
         document.addEventListener("DOMContentLoaded", () => {
             if (location.hash) {
                 hashChanged();
             } else {
                 movePage("/member/login");
             }
-
-            reconnectStomp();
         });
 
     </script>
