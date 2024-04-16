@@ -93,5 +93,19 @@ public class All {
         chatService.writeMessage(room2, memberUser2, "message8");
 
         chatService.writeMessage(room3, memberUser1, "message9");
+
+        chatService.writeMessage(room13, memberUser1, "message10");
+        chatService.writeMessage(room13, memberUser1, "message11");
+        chatService.writeMessage(room13, memberUser1, "message12");
+
+        chatService.writeMessage(room13, memberUser2, "message13");
+        chatService.writeMessage(room13, memberUser2, "message14");
+
+        chatService.writeMessage(room13, memberUser3, "message15");
+
+        chatService.writeMessage(room14, memberUser1, "message16");
+        chatService.writeMessage(room14, memberUser2, "message17");
+
+        chatService.writeMessage(room15, memberUser1, "message18");
     }
 }
