@@ -80,12 +80,15 @@
     <script>
         console.clear();
 
-        const socket = new SockJS("https://localhost:8090/ws");
-        const stompClient = Stomp.over(socket);
+        let stompClient = null;
 
-        stompClient.connect({}, function (frame) {
-            console.log("Connected: " + frame);
-        });
+        function reconnectStomp() {
+            const socket = new SockJS("https://localhost:8090/ws");
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function (frame) {
+                console.log("Connected: " + frame);
+            });
+        }
 
         class Rq {
             constructor(hash) {
@@ -243,6 +246,8 @@
                 document.querySelector(
                     "#login-rs"
                 ).innerHTML = `<button>${data.data.item.name} 로그아웃</button>`;
+
+                reconnectStomp();
             } catch (error) {
                 console.error("login form submission failed:", error);
             }
@@ -473,6 +478,8 @@
             } else {
                 movePage("/member/login");
             }
+
+            reconnectStomp();
         });
 
     </script>
